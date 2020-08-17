@@ -15,6 +15,10 @@ function getPackageVersion() {
 	return getPackageFile().version;
 }
 
-function logPackageVersion() {
-	return `zero-cli version: ${getPackageVersion()}`;
+// 获取 package.json projectName
+function getPackageName() {
+	return getPackageFile().name;
 }
+
+exports.getPackageName = getPackageName;
+exports.getPackageVersion = getPackageVersion;

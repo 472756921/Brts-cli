@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
 const program = require("commander");
+const { getPackageVersion, getPackageName } = require("../src/utils");
+
+console.log();
+console.log(`Welcome used ${getPackageName()} - ${getPackageVersion()}`);
+console.log();
 
 program.version(require("../package").version).usage("<command> [options]").command("init [name]", "generate a new project");
 

@@ -1,0 +1,48 @@
+#! /usr/bin/env node
+const inquirer = require("inquirer");
+const fse = require("fs-extra");
+const ora = require("ora");
+const downloadGitRepo = require("download-git-repo");
+const path = require("path");
+
+inquirer
+	.prompt([
+		{
+			type: "input",
+			name: "projectName",
+			message: "请输入项目名称：",
+			validate(input) {
+				if (!input) {
+					return "项目名不能为空";
+				}
+				if (fse.existsSync(input)) {
+					return `当前目录已存在${input}项目文件夹，请重新命名`;
+				}
+				return true;
+			},
+		},
+		{
+			type: "input",
+			name: "description",
+			message: "请输入项目描述：",
+		},
+	])
+	.then((answer) => {
+		const { projectName, description } = answer;
+
+		const projectPath = path.join(process.cwd(), projectName);
+		const downloadPath = path.join(projectPath, "__download__");
+
+		const downloadSpinner = ora("正在下载模板，请稍等...\n");
+		downloadSpinner.start();
+		downloadGitRepo("direct:https://github.com/472756921/Brts.git", downloadPath, { clone: true }, (err) => {
+			if (err) {
+				downloadSpinner.color = "red";
+				downloadSpinner.fail(err.message);
+				return;
+			} else {
+				downloadSpinner.color = "green";
+				downloadSpinner.succeed("下载成功");
+			}
+		});
+	});
