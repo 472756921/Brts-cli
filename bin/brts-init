@@ -7,6 +7,7 @@ const path = require("path");
 const memFs = require("mem-fs");
 const editor = require("mem-fs-editor");
 const chalk = require("chalk");
+const { exec } = require("child_process");
 
 inquirer
 	.prompt([
@@ -37,7 +38,7 @@ inquirer
 		const projectPath = path.join(process.cwd(), projectName);
 		const downloadPath = path.join(projectPath, "__download__");
 
-		const downloadSpinner = ora("正在下载模板，请稍等...\n");
+		const downloadSpinner = ora("正在下载模板，请稍候...\n");
 		downloadSpinner.start();
 
 		// 把模板项目下载到 临时文件夹 __download__
@@ -47,9 +48,6 @@ inquirer
 				downloadSpinner.fail(err.message);
 				return;
 			}
-			downloadSpinner.color = "green";
-			downloadSpinner.succeed("下载成功");
-
 			// 先遍历 __download__ 得到文件列表 （除开 package.json）
 			let filesToCopy = [];
 			try {
@@ -87,9 +85,26 @@ inquirer
 			// 在硬盘中创建 package.json 文件 使用 memFsEditor.commit
 			memFsEditor.commit(() => {
 				console.log(`${chalk.green("✔ ")}${chalk.grey(`创建: ${projectName}/package.json`)}`);
+
+				fse.remove(downloadPath);
+				// 变更 Node.js 进程的当前工作目录
+				process.chdir(projectPath);
+				const installSpinner = ora(`安装项目依赖 ${chalk.green.bold("npm install")}, 请稍候...`);
+				installSpinner.start();
+				exec("npm install", (error, stdout, stderr) => {
+					if (error) {
+						installSpinner.color = "red";
+						installSpinner.fail(chalk.red("安装项目依赖失败，请自行重新安装！"));
+						console.log(error);
+					} else {
+						installSpinner.color = "green";
+						installSpinner.succeed("安装依赖成功");
+						console.log(`${stderr}${stdout}`);
+						console.log();
+						console.log(chalk.green("创建项目成功！"));
+						console.log(chalk.green("Let's Coding"));
+					}
+				});
 			});
-			fse.remove(downloadPath);
-			// 变更 Node.js 进程的当前工作目录
-			process.chdir(projectPath);
 		});
 	});
