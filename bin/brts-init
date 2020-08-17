@@ -4,6 +4,9 @@ const fse = require("fs-extra");
 const ora = require("ora");
 const downloadGitRepo = require("download-git-repo");
 const path = require("path");
+const memFs = require("mem-fs");
+const editor = require("mem-fs-editor");
+const chalk = require("chalk");
 
 inquirer
 	.prompt([
@@ -30,19 +33,63 @@ inquirer
 	.then((answer) => {
 		const { projectName, description } = answer;
 
+		// process.cwd() 得到当前终端工作路径，projectPath：当前终端工作路径 + /项目名称
 		const projectPath = path.join(process.cwd(), projectName);
 		const downloadPath = path.join(projectPath, "__download__");
 
 		const downloadSpinner = ora("正在下载模板，请稍等...\n");
 		downloadSpinner.start();
+
+		// 把模板项目下载到 临时文件夹 __download__
 		downloadGitRepo("direct:https://github.com/472756921/Brts.git", downloadPath, { clone: true }, (err) => {
 			if (err) {
 				downloadSpinner.color = "red";
 				downloadSpinner.fail(err.message);
 				return;
-			} else {
-				downloadSpinner.color = "green";
-				downloadSpinner.succeed("下载成功");
 			}
+			downloadSpinner.color = "green";
+			downloadSpinner.succeed("下载成功");
+
+			// 先遍历 __download__ 得到文件列表 （除开 package.json）
+			let filesToCopy = [];
+			try {
+				const files = fse.readdirSync(downloadPath);
+				files.forEach((file) => {
+					if (file.indexOf("package.json") > -1) return;
+					filesToCopy.push(file);
+				});
+			} catch (e) {
+				downloadSpinner.color = "red";
+				downloadSpinner.fail(e.message);
+				return false;
+			}
+			// 将下载的到  __download__ 的内容复制到 项目下（projectPath）
+			filesToCopy.forEach((file) => {
+				fse.copySync(path.join(downloadPath, file), path.join(projectPath, file));
+				console.log(`${chalk.green("✔ ")}${chalk.grey(`创建: ${projectName}/${file}`)}`);
+			});
+
+			// 建立模板
+			const store = memFs.create();
+			const memFsEditor = editor.create(store);
+
+			// 将 用户输入的 projectName 和 description 写入到 内存中 package.json 模板中（ __download__ 中的文件为模板）
+			/**
+			 * @param {string} source 源文件路径
+			 * @param {string} dest 目标文件路径
+			 * @param {object} data 替换文本字段
+			 */
+			memFsEditor.copyTpl(path.join(downloadPath, "package.json"), path.join(projectName, "package.json"), {
+				projectName,
+				description,
+			});
+
+			// 在硬盘中创建 package.json 文件 使用 memFsEditor.commit
+			memFsEditor.commit(() => {
+				console.log(`${chalk.green("✔ ")}${chalk.grey(`创建: ${projectName}/package.json`)}`);
+			});
+			fse.remove(downloadPath);
+			// 变更 Node.js 进程的当前工作目录
+			process.chdir(projectPath);
 		});
 	});
