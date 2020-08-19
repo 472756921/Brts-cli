@@ -1,6 +1,6 @@
 {
 	"name": "brts-cli",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Creates a ReactJS application using the command line.",
 	"scripts": {},
 	"bin": {

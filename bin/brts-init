@@ -48,6 +48,8 @@ inquirer
 				downloadSpinner.fail(err.message);
 				return;
 			}
+			downloadSpinner.color = "green";
+			downloadSpinner.succeed("下载模板完成");
 			// 先遍历 __download__ 得到文件列表 （除开 package.json）
 			let filesToCopy = [];
 			try {
@@ -78,15 +80,17 @@ inquirer
 			 * @param {object} data 替换文本字段
 			 */
 			memFsEditor.copyTpl(path.join(downloadPath, "package.json"), path.join(projectName, "package.json"), {
-				projectName,
-				description,
+				name: "123123",
+				description: "asdfasdf",
+				test: "asdfasdf",
 			});
 
 			// 在硬盘中创建 package.json 文件 使用 memFsEditor.commit
 			memFsEditor.commit(() => {
 				console.log(`${chalk.green("✔ ")}${chalk.grey(`创建: ${projectName}/package.json`)}`);
-
+				return false;
 				fse.remove(downloadPath);
+
 				// 变更 Node.js 进程的当前工作目录
 				process.chdir(projectPath);
 				const installSpinner = ora(`安装项目依赖 ${chalk.green.bold("npm install")}, 请稍候...`);
