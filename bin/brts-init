@@ -8,6 +8,7 @@ const memFs = require("mem-fs");
 const editor = require("mem-fs-editor");
 const chalk = require("chalk");
 const { exec } = require("child_process");
+const { repository } = require("../src/config");
 
 inquirer
 	.prompt([
@@ -30,9 +31,19 @@ inquirer
 			name: "description",
 			message: "请输入项目描述：",
 		},
+		{
+			type: "rawlist",
+			name: "isTs",
+			message: "是否使用 typescript?",
+			choices: [
+				{ name: "yes", value: 1 },
+				{ name: "no", value: 0 },
+			],
+			default: 0,
+		},
 	])
 	.then((answer) => {
-		const { projectName, description } = answer;
+		const { projectName, description, isTs } = answer;
 
 		// process.cwd() 得到当前终端工作路径，projectPath：当前终端工作路径 + /项目名称
 		const projectPath = path.join(process.cwd(), projectName);
@@ -41,8 +52,12 @@ inquirer
 		const downloadSpinner = ora("正在下载模板，请稍候...\n");
 		downloadSpinner.start();
 
+		let gitUrl = repository.react;
+		if (isTs) {
+			gitUrl = repository.react_ts;
+		}
 		// 把模板项目下载到 临时文件夹 __download__
-		downloadGitRepo("direct:https://github.com/472756921/Brts.git", downloadPath, { clone: true }, (err) => {
+		downloadGitRepo(gitUrl, downloadPath, { clone: true }, (err) => {
 			if (err) {
 				downloadSpinner.color = "red";
 				downloadSpinner.fail(err.message);
