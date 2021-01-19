@@ -107,7 +107,7 @@ inquirer
 				process.chdir(projectPath);
 				const installSpinner = ora(`安装项目依赖 ${chalk.green.bold("npm install")}, 请稍候...`);
 				installSpinner.start();
-				exec("yarn add", (error, stdout, stderr) => {
+				exec("yarn install", (error, stdout, stderr) => {
 					if (error) {
 						installSpinner.color = "red";
 						installSpinner.fail(chalk.red("安装项目依赖失败，请自行重新安装！"));
