@@ -94,11 +94,17 @@ inquirer
 			 * @param {string} dest 目标文件路径
 			 * @param {object} data 替换文本字段
 			 */
-			memFsEditor.copyTpl(path.join(downloadPath, "package.json"), path.join(projectName, "package.json"), {
-				name: "<%= projectName %>",
-				description: "<%= description %>",
-				version: "1.0.0",
-			});
+
+			let pkj = memFsEditor.readJSON(path.join(downloadPath, "package.json"));
+			pkj.name = projectName;
+			pkj.description = description;
+
+			memFsEditor.writeJSON(path.join(projectName, "package.json"), pkj);
+
+			// memFsEditor.copyTpl(path.join(downloadPath, "package.json"), path.join(projectName, "package.json"), {
+			// 	name: projectName,
+			// 	description: description,
+			// });
 
 			// 在硬盘中创建 package.json 文件 使用 memFsEditor.commit
 			memFsEditor.commit(() => {
