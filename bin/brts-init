@@ -105,33 +105,14 @@ inquirer
 
 			memFsEditor.writeJSON(path.join(projectName, "package.json"), pkj);
 
-			// memFsEditor.copyTpl(path.join(downloadPath, "package.json"), path.join(projectName, "package.json"), {
-			// 	name: projectName,
-			// 	description: description,
-			// });
-
-			// 在硬盘中创建 package.json 文件 使用 memFsEditor.commit
+            // 在硬盘中创建 package.json 文件 使用 memFsEditor.commit
 			memFsEditor.commit(() => {
 				console.log(`${chalk.green("✔ ")}${chalk.grey(`创建: ${projectName}/package.json`)}`);
 				fse.remove(downloadPath);
 				// 变更 Node.js 进程的当前工作目录
 				process.chdir(projectPath);
-				const installSpinner = ora(`安装项目依赖 ${chalk.green.bold("yarn install")}, 请稍候...`);
-				installSpinner.start();
-				exec("yarn install", (error, stdout, stderr) => {
-					if (error) {
-						installSpinner.color = "red";
-						installSpinner.fail(chalk.red("安装项目依赖失败，请自行重新安装！"));
-						console.log(error);
-					} else {
-						installSpinner.color = "green";
-						installSpinner.succeed("安装依赖成功");
-						console.log(`${stderr}${stdout}`);
-						console.log();
-						console.log(chalk.green("创建项目成功！"));
-						console.log(chalk.green("Let's Coding"));
-					}
-				});
+				console.log(chalk.green("创建项目成功！"));
+				console.log(chalk.green("Let's Coding"));
 			});
 		});
 	});
