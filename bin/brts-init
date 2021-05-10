@@ -36,15 +36,15 @@ inquirer
 			name: "publicVersion",
 			message: "选择版本",
 			choices: [
-				{ name: "react ts", value: 1 },
-				{ name: "react js", value: 0 },
-				{ name: "react micro frontend ", value: 2 },
+				{ name: "react js", value: 1 },
+				{ name: "react ts", value: 2 },
+				{ name: "react micro frontend ", value: 3 },
 			],
 			default: 0,
 		},
 	])
 	.then((answer) => {
-		const { projectName, description, isTs } = answer;
+		const { projectName, description, publicVersion } = answer;
 
 		// process.cwd() 得到当前终端工作路径，projectPath：当前终端工作路径 + /项目名称
 		const projectPath = path.join(process.cwd(), projectName);
@@ -54,10 +54,10 @@ inquirer
 		downloadSpinner.start();
 
 		let gitUrl = repository.react;
-		if (isTs === 1) {
+		if (publicVersion === 2) {
 			gitUrl = repository.react_ts;
 		}
-		if (isTs === 2) {
+		if (publicVersion === 3) {
 			gitUrl = repository.micro_frontend_template;
 		}
 		// 把模板项目下载到 临时文件夹 __download__
