@@ -33,11 +33,12 @@ inquirer
 		},
 		{
 			type: "rawlist",
-			name: "isTs",
-			message: "是否使用 typescript?",
+			name: "publicVersion",
+			message: "选择版本",
 			choices: [
-				{ name: "yes", value: 1 },
-				{ name: "no", value: 0 },
+				{ name: "react ts", value: 1 },
+				{ name: "react js", value: 0 },
+				{ name: "react micro frontend ", value: 2 },
 			],
 			default: 0,
 		},
@@ -53,8 +54,11 @@ inquirer
 		downloadSpinner.start();
 
 		let gitUrl = repository.react;
-		if (isTs) {
+		if (isTs === 1) {
 			gitUrl = repository.react_ts;
+		}
+		if (isTs === 2) {
+			gitUrl = repository.micro_frontend_template;
 		}
 		// 把模板项目下载到 临时文件夹 __download__
 		downloadGitRepo(gitUrl, downloadPath, { clone: true }, (err) => {
